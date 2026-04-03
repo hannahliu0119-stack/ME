@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>刘焕彤 Hannah | AI产品经理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+        * { 
+            font-family: 'Inter', sans-serif; 
+            scroll-behavior: smooth;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        :root {
+            --primary: #FF7D45;
+            --primary-light: #FFE5D9;
+            --secondary: #FFB7A5;
+            --accent: #FFD166;
+            --bg-warm: #FFFBF8;
+            --bg-white: #FFFFFF;
+            --text-dark: #2D2013;
+            --text-gray: #5C4B3F;
+            --text-light: #8A7A6D;
+        }
+
+        /* 鼠标跟随粒子 */
+        #cursor-follower {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            opacity: 0.6;
+            pointer-events: none;
+            z-index: 99999;
+            transition: transform 0.15s ease-out;
+            mix-blend-mode: multiply;
+        }
+        #cursor-blur {
+            position: fixed;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,125,69,0.15) 0%, rgba(255,183,165,0) 70%);
+            pointer-events: none;
+            z-index: 99998;
+            transition: transform 0.3s ease-out;
+        }
+
+        /* 文字拆分动画 */
+        .char {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(30px) rotateX(90deg);
+            transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .char.visible {
+            opacity: 1;
+            transform: translateY(0) rotateX(0);
+        }
+
+        /* 滚动渐入基础动画 */
+        .fade-in { 
+            opacity: 0; 
+            transform: translateY(50px); 
+            transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1); 
+        }
+        .fade-in.visible { 
+            opacity: 1; 
+            transform: translateY(0); 
+        }
+
+        /* 3D卡片悬浮效果 */
+        .card-3d { 
+            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1); 
+            cursor: pointer;
+            transform-style: preserve-3d;
+            position: relative;
+        }
+        .card-3d:hover { 
+            transform: translateY(-12px) rotateX(5deg) rotateY(3deg); 
+            box-shadow: 0 25px 50px rgba(255,125,69,0.2); 
+        }
+        .card-3d::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            z-index: -1;
+        }
+        .card-3d:hover::before {
+            opacity: 0.1;
+        }
+
+        /* 磁悬浮按钮 */
+        .magnetic {
+            transition: transform 0.2s ease;
+        }
+
+        /* 导航栏动效 */
+        .nav-link {
+            position: relative;
+            transition: all 0.3s ease;
+            padding: 6px 0;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 3px;
+            transition: width 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .nav-link:hover::after, .nav-link.nav-active::after {
+            width: 100%;
+        }
+        .nav-active { 
+            color: var(--primary) !important; 
+            font-weight: 700; 
+        }
+
+        /* 滚动进度条 */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent), var(--secondary));
+            z-index: 9999;
+            transition: width 0.1s ease;
+        }
+
+        /* 流动渐变背景 */
+        .gradient-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(120deg, rgba(255,125,69,0.05), rgba(255,183,165,0.08), rgba(255,209,102,0.05));
+            background-size: 400% 400%;
+            animation: gradientFlow 15s ease infinite;
+            z-index: -1;
+        }
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* 头像3D呼吸动画 */
+        .avatar-3d { 
+            animation: avatarBreathe 4s ease-in-out infinite;
+            transform-style: preserve-3d;
+        }
+        @keyframes avatarBreathe { 
+            0%,100% { 
+                transform: scale(1) rotateY(0); 
+                box-shadow: 0 0 30px rgba(255,125,69,0.2); 
+            } 
+            25% {
+                transform: scale(1.02) rotateY(3deg);
+            }
+            50% { 
+                transform: scale(1.05) rotateY(0); 
+                box-shadow: 0 0 60px rgba(255,125,69,0.35); 
+            } 
+            75% {
+                transform: scale(1.02) rotateY(-3deg);
+            }
+        }
+
+        /* 数字增长动画 */
+        .count-up {
+            display: inline-block;
+        }
+
+        /* 技能标签波浪动画 */
+        .skill-tag {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            z-index: 1;
+        }
+        .skill-tag::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            transition: left 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+            z-index: -1;
+        }
+        .skill-tag:hover { 
+            color: white !important; 
+            transform: translateY(-3px);
+        }
+        .skill-tag:hover::before { 
+            left: 0;
+        }
+
+        /* 照片灯箱 */
+        .lightbox { 
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0,0,0,0.9); 
+            z-index: 10000; 
+            justify-content: center; 
+            align-items: center; 
+            animation: fadeIn 0.4s ease;
+            backdrop-filter: blur(10px);
+        }
+        .lightbox img { 
+            max-width: 90%; 
+            max-height: 90%; 
+            object-fit: contain; 
+            animation: scaleIn 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            border-radius: 12px;
+        }
+        .lightbox-close { 
+            position: absolute; 
+            top: 20px; 
+            right: 30px; 
+            color: white; 
+            font-size: 50px; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+        }
+        .lightbox-close:hover { 
+            color: var(--primary); 
+            transform: rotate(90deg);
+        }
+        .lightbox-nav { 
+            position: absolute; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            color: white; 
+            font-size: 50px; 
+            cursor: pointer; 
+            padding: 20px; 
+            transition: all 0.3s ease; 
+        }
+        .lightbox-nav:hover { 
+            color: var(--primary); 
+            transform: translateY(-50%) scale(1.2);
+        }
+        .lightbox-prev { left: 20px; }
+        .lightbox-next { right: 20px; }
+
+        /* 回到顶部按钮 */
+        .back-to-top { 
+            position: fixed; 
+            bottom: 30px; 
+            right: 30px; 
+            width: 60px; 
+            height: 60px; 
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white; 
+            border-radius: 50%; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            cursor: pointer; 
+            opacity: 0; 
+            transition: all 0.4s ease; 
+            z-index: 9999; 
+            box-shadow: 0 10px 25px rgba(255,125,69,0.3);
+        }
+        .back-to-top.visible { 
+            opacity: 1; 
+        }
+        .back-to-top:hover { 
+            transform: rotate(180deg) scale(1.1); 
+        }
+
+        /* 照片caption动效 */
+        .photo-caption { 
+            opacity: 0; 
+            transform: translateY(20px);
+            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1); 
+        }
+        .photo-card:hover .photo-caption { 
+            opacity: 1; 
+            transform: translateY(0);
+        }
+
+        /* 详情弹窗 */
+        .detail-modal { 
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0,0,0,0.7); 
+            z-index: 20000; 
+            justify-content: center; 
+            align-items: center; 
+            padding: 20px; 
+            box-sizing: border-box; 
+            animation: fadeIn 0.4s ease;
+            backdrop-filter: blur(8px);
+        }
+        .modal-content { 
+            background: var(--bg-white); 
+            width: 100%; 
+            max-width: 1000px; 
+            max-height: 85vh; 
+            border-radius: 20px; 
+            overflow-y: auto; 
+            padding: 50px; 
+            position: relative; 
+            animation: modalFlipIn 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+            transform-style: preserve-3d;
+        }
+        @keyframes modalFlipIn {
+            from { 
+                opacity: 0; 
+                transform: rotateY(90deg) scale(0.8); 
+            }
+            to { 
+                opacity: 1; 
+                transform: rotateY(0) scale(1); 
+            }
+        }
+        .modal-close { 
+            position: absolute; 
+            top: 20px; 
+            right: 25px; 
+            font-size: 35px; 
+            cursor: pointer; 
+            color: var(--text-light); 
+            transition: all 0.3s ease; 
+        }
+        .modal-close:hover { 
+            color: var(--primary); 
+            transform: rotate(90deg);
+        }
+        .modal-title { 
+            font-size: 32px; 
+            font-weight: 800; 
+            color: var(--text-dark); 
+            margin-bottom: 25px; 
+            padding-bottom: 20px; 
+            border-bottom: 3px solid var(--primary); 
+        }
+        .modal-subtitle { 
+            font-size: 20px; 
+            font-weight: 700; 
+            color: var(--primary); 
+            margin: 25px 0 12px; 
+        }
+        .modal-content p, .modal-content li { 
+            line-height: 1.9; 
+            color: var(--text-gray); 
+            margin-bottom: 12px; 
+            font-size: 16px;
+        }
+        .modal-content ul { 
+            margin: 12px 0 25px 25px; 
+        }
+        .modal-tip { 
+            text-align: center; 
+            color: var(--text-light); 
+            font-size: 14px; 
+            margin-top: 8px; 
+            font-style: italic;
+        }
+
+        /* 动画关键帧 */
+        @keyframes fadeIn { 
+            from { opacity: 0; } 
+            to { opacity: 1; } 
+        }
+        @keyframes scaleIn { 
+            from { 
+                opacity: 0; 
+                transform: scale(0.8); 
+            } 
+            to { 
+                opacity: 1; 
+                transform: scale(1); 
+            } 
+        }
+
+        /* 滚动条美化 */
+        ::-webkit-scrollbar { 
+            width: 10px; 
+        }
+        ::-webkit-scrollbar-track { 
+            background: var(--bg-warm); 
+        }
+        ::-webkit-scrollbar-thumb { 
+            background: linear-gradient(180deg, var(--primary), var(--accent)); 
+            border-radius: 10px; 
+        }
+        ::-webkit-scrollbar-thumb:hover { 
+            background: var(--primary); 
+        }
+
+        /* 视差滚动元素 */
+        .parallax {
+            transition: transform 0.1s ease-out;
+            will-change: transform;
+        }
+    </style>
+</head>
+<body class="bg-[var(--bg-warm)] text-[var(--text-dark)]">
+    <!-- 鼠标跟随粒子 -->
+    <div id="cursor-blur"></div>
+    <div id="cursor-follower"></div>
+
+    <!-- 滚动进度条 -->
+    <div id="scrollProgress" class="scroll-progress"></div>
+
+    <!-- 固定顶部导航 -->
+    <nav id="navbar" class="fixed w-full top-0 z-50 bg-white/80 backdrop-blur-xl shadow-sm transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-6 py-5">
+            <div class="flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm md:text-base font-medium">
+                <a href="#home" class="nav-link hover:text-[var(--primary)] transition-colors">核心主页</a>
+                <a href="#academic" class="nav-link hover:text-[var(--primary)] transition-colors">学术版图</a>
+                <a href="#practice" class="nav-link hover:text-[var(--primary)] transition-colors">职场战场</a>
+                <a href="#project" class="nav-link hover:text-[var(--primary)] transition-colors">创造工坊</a>
+                <a href="#ability" class="nav-link hover:text-[var(--primary)] transition-colors">能力武器库</a>
+                <a href="#life" class="nav-link hover:text-[var(--primary)] transition-colors">生活放映厅</a>
+                <a href="#contact" class="nav-link hover:text-[var(--primary)] transition-colors">联结通道</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 核心主页 -->
+    <section id="home" class="min-h-screen flex items-center justify-center pt-24 px-6 relative">
+        <div class="gradient-bg"></div>
+        <div class="text-center z-10">
+            <div class="w-48 h-48 rounded-full overflow-hidden mx-auto mb-10 avatar-3d border-4 border-[var(--primary)]/20">
+                <img src="./个人照片/avatar.jpg" class="w-full h-full object-cover" alt="刘焕彤头像">
+            </div>
+            <h1 class="text-5xl md:text-7xl font-extrabold text-[var(--text-dark)] mb-6 split-text">刘焕彤 Hannah</h1>
+            <p class="text-2xl md:text-3xl text-[var(--primary)] font-bold mb-8 split-text">AI产品经理 | 商业分析 × 人工智能</p>
+            <p class="text-lg md:text-xl text-[var(--text-gray)] max-w-3xl mx-auto mb-10 fade-in">
+                香港大学商业分析硕士 | 上海大学人工智能本科 | 从0到1打造AI产品
+            </p>
+            <div class="flex flex-wrap justify-center gap-4 fade-in">
+                <a href="#academic" class="magnetic px-8 py-3 bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] text-white font-bold rounded-full shadow-lg hover:shadow-xl transition-all">
+                    查看我的履历
+                </a>
+                <a href="#contact" class="magnetic px-8 py-3 bg-white border-2 border-[var(--primary)] text-[var(--primary)] font-bold rounded-full shadow-sm hover:shadow-md transition-all">
+                    与我联结
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 学术版图 -->
+    <section id="academic" class="py-28 px-6 bg-white relative">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-extrabold text-[var(--text-dark)] mb-6 split-text fade-in">学术版图</h2>
+            <p class="text-[var(--text-gray)] text-lg mb-16 fade-in">我的知识体系与学术成长路径</p>
+            
+            <div class="grid md:grid-cols-2 gap-10">
+                <div class="bg-[var(--bg-warm)] p-10 rounded-3xl card-3d fade-in" onclick="openModal('edu-hku')">
+                    <div class="flex items-center mb-6">
+                        <i class="fa fa-graduation-cap text-4xl text-[var(--primary)] mr-4"></i>
+                        <h3 class="text-2xl font-bold text-[var(--text-dark)]">香港大学</h3>
+                    </div>
+                    <p class="text-[var(--primary)] font-semibold mb-4">经管学院 | 商业分析(AI Stream) | 硕士</p>
+                    <p class="text-[var(--text-light)] text-sm mb-6">2025.09 - 2026.11</p>
+                    <ul class="space-y-3 text-[var(--text-gray)]">
+                        <li>• 系统掌握商业统计、用户行为分析、A/B测试核心方法</li>
+                        <li>• 聚焦AI技术商业落地，构建完整产品落地方法论</li>
+                        <li>• 补齐商业决策思维，实现技术到商业的全链路贯通</li>
+                    </ul>
+                    <p class="modal-tip mt-6">点击查看完整学术背景深挖</p>
+                </div>
+                <div class="bg-[var(--bg-warm)] p-10 rounded-3xl card-3d fade-in" onclick="openModal('edu-shu')">
+                    <div class="flex items-center mb-6">
+                        <i class="fa fa-code text-4xl text-[var(--primary)] mr-4"></i>
+                        <h3 class="text-2xl font-bold text-[var(--text-dark)]">上海大学</h3>
+                    </div>
+                    <p class="text-[var(--primary)] font-semibold mb-4">计算机学院 | 人工智能 | 本科</p>
+                    <p class="text-[var(--text-light)] text-sm mb-6">2021.09 - 2025.06</p>
+                    <ul class="space-y-3 text-[var(--text-gray)]">
+                        <li>• 深耕机器学习、计算机视觉、NLP核心技术体系</li>
+                        <li>• 掌握AI开发全流程，可与研发团队无障碍沟通</li>
+                        <li>• 发表AI国际会议论文，深耕医学图像分类算法研究</li>
+                    </ul>
+                    <p class="modal-tip mt-6">点击查看完整学术背景深挖</p>
+                </div>
+            </div>
+
+            <div class="mt-16 text-center fade-in">
+                <div class="photo-card inline-block relative">
+                    <img src="./个人照片/photo1.jpg" class="w-full max-w-lg rounded-2xl shadow-xl cursor-pointer" onclick="openLightbox(0)" alt="校园生活">
+                    <div class="photo-caption absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-8 rounded-b-2xl">
+                        <p class="text-white text-lg">2025年，香港大学，开启AI与商业的融合之旅</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 职场战场 -->
+    <section id="practice" class="py-28 px-6 relative">
+        <div class="gradient-bg"></div>
+        <div class="max-w-6xl mx-auto z-10 relative">
+            <h2 class="text-4xl md:text-5xl font-extrabold text-[var(--text-dark)] mb-6 split-text fade-in">职场战场</h2>
+            <p class="text-[var(--text-gray)] text-lg mb-16 fade-in">我的商业实战与落地成果</p>
+            
+            <div class="space-y-10">
+                <div class="bg-white p-10 rounded-3xl shadow-md card-3d fade-in" onclick="openModal('intern-fosun')">
+                    <div class="flex flex-wrap justify-between items-start mb-6">
+                        <div>
+                            <h3 class="text-2xl font-bold text-[var(--text-dark)]">复星旅游文化集团AI Lab</h3>
+                            <p class="text-[var(--primary)] font-semibold mt-2">AI产品经理 | 2025.03 - 2025.08</p>
+                        </div>
+                        <span class="px-4 py-2 bg-[var(--primary-light)] text-[var(--primary)] font-bold rounded-full">核心项目</span>
+                    </div>
+                    <ul class="space-y-3 text-[var(--text-gray)]">
+                        <li>• 独立负责钉钉办公赋能AI产品从0到1全流程落地，沉淀<span class="count-up font-bold text-[var(--primary)]" data-target="10000">0</span>+官方知识库文件</li>
+                        <li>• 主导Prompt工程与AI Agent调优，问答准确率稳定<span class="count-up font-bold text-[var(--primary)]" data-target="90">0</span>%以上</li>
+                        <li>• 搭建产品评测体系，联动多团队完成交付，组织集团AI赋能培训会</li>
+                        <li>• 撰写「领导力+AI」行业研报，支撑高层业务决策</li>
+                    </ul>
+                    <p class="modal-tip mt-6">点击查看完整实习经历深挖</p>
+                </div>
+                <div class="bg-white p-10 rounded-3xl shadow-md card-3d fade-in" onclick="openModal('intern-rentuo')">
+                    <div class="flex flex-wrap justify-between items-start mb-6">
+                        <div>
+                            <h3 class="text-2xl font-bold text-[var(--text-dark)]">任拓数据科技</h3>
+                            <p class="text-[var(--primary)] font-semibold mt-2">数据分析师 | 2024.10 - 2025.03</p>
+                        </div>
+                    </div>
+                    <ul class="space-y-3 text-[var(--text-gray)]">
+                        <li>• 用Python开发自动化脚本，数据准备效率提升<span class="count-up font-bold text-[var(--primary)]" data-target="80">0</span>%</li>
+                        <li>• 独立制作《新品速递周报》，输出商业策略，成为品牌客户决策核心参考</li>
+                    </ul>
+                    <p class="modal-tip mt-6">点击查看完整实习经历深挖</p>
+                </div>
+                <div class="bg-white p-10 rounded-3xl shadow-md card-3d fade-in" onclick="openModal('intern-dbzq')">
+                    <div class="flex flex-wrap justify-between items-start mb-6">
+                        <div>
+                            <h3 class="text-2xl font-bold text-[var(--text-dark)]">东北证券</h3>
+                            <p class="text-[var(--primary)] font-semibold mt-2">运营策划(互联网渠道) | 2024.06 - 2024.10</p>
+                        </div>
+                    </div>
+                    <ul class="space-y-3 text-[var(--text-gray)]">
+                        <li>• 搭建转化漏斗与ROI分析体系，整体入金转化率提升<span class="count-up font-bold text-[var(--primary)]" data-target="12">0</span>%</li>
+                        <li>• 设计用户分层触达SOP，沉默用户唤醒率提升<span class="count-up font-bold text-[var(--primary)]" data-target="8">0</span>%</li>
+                    </ul>
+                    <p class="modal-tip mt-6">点击查看完整实习经历深挖</p>
+                </div>
+                <div class="bg-white p-10 rounded-3xl shadow-md card-3d fade-in" onclick="openModal('intern-pulan')">
+                    <div class="flex flex-wrap justify-between items-start mb-6">
+                        <div>
+                            <h3 class="text-2xl font-bold text-[var(--text-dark)]">上海普兰金融服务有限公司</h3>
+                            <p class="text-[var(--primary)] font-semibold mt-2">科技部 测试开发 | 2023.05 - 2023.09</p>
+                        </div>
+                    </div>
+                    <ul class="space-y-3 text-[var(--text-gray)]">
+                        <li>• 负责金融服务软件全流程测试，编写覆盖全场景测试用例</li>
+                        <li>• 独立发现并修复核心bug，完成接口测试与脚本开发</li>
+                    </ul>
+                    <p class="modal-tip mt-6">点击查看完整实习经历深挖</p>
+                </div>
+            </div>
+
+            <div class="mt-16 text-center fade-in">
+                <div class="photo-card inline-block relative">
+                    <img src="./个人照片/photo2.jpg" class="w-full max-w-lg rounded-2xl shadow-xl cursor-pointer" onclick="openLightbox(1)" alt="职场生活">
+                    <div class="photo-caption absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-8 rounded-b-2xl">
+                        <p class="text-white text-lg">2025年，复星AI Lab，完成首款AI产品从0到1落地</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 创造工坊 -->
+    <section id="project" class="py-28 px-6 bg-white relative">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-extrabold text-[var(--text-dark)] mb-6 split-text fade-in">创造工坊</h2>
+            <p class="text-[var(--text-gray)] text-lg mb-16 fade-in">我从0到1打造的产品与项目作品</p>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-[var(--bg-warm)] p-8 rounded-3xl card-3d fade-in" onclick="openModal('project-abtest')">
+                    <div class="mb-6">
+                        <i class="fa fa-bar-chart text-5xl text-[var(--primary)]"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-[var(--text-dark)] mb-3">K-12数学视频干预A/B测试研究</h3>
+                    <p class="text-[var(--primary)] font-semibold mb-4">项目负责人</p>
+                    <p class="text-[var(--text-gray)]">带领8人团队，基于<span class="font-bold">8万+</span>学生数据，通过严谨A/B测试验证教学干预效果，输出个性化教学策略。</p>
+                    <p class="modal-tip mt-6">点击查看完整项目深挖</p>
+                </div>
+                <div class="bg-[var(--bg-warm)] p-8 rounded-3xl card-3d fade-in" onclick="openModal('project-ecolink')">
+                    <div class="mb-6">
+                        <i class="fa fa-leaf text-5xl text-[var(--primary)]"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-[var(--text-dark)] mb-3">EcoLink AI社区环保公益平台</h3>
+                    <p class="text-[var(--primary)] font-semibold mb-4">产品经理</p>
+                    <p class="text-[var(--text-gray)]">国内首个社区场景AI环保公益平台，打造「分类-回收-循环-捐赠」全链路闭环，兼顾公益价值与商业可持续。</p>
+                    <p class="modal-tip mt-6">点击查看完整项目深挖</p>
+                </div>
+                <div class="bg-[var(--bg-warm)] p-8 rounded-3xl card-3d fade-in" onclick="openModal('project-zhihai')">
+                    <div class="mb-6">
+                        <i class="fa fa-compass text-5xl text-[var(--primary)]"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-[var(--text-dark)] mb-3">职海导航 AI求职助手</h3>
+                    <p class="text-[var(--primary)] font-semibold mb-4">项目负责人 | 独立开发</p>
+                    <p class="text-[var(--text-gray)]">独立打造一站式AI求职评估工具，集简历分析、岗位匹配、成功率量化、优化建议于一体，完整产品闭环。</p>
+                    <p class="modal-tip mt-6">点击查看完整项目深挖</p>
+                </div>
+            </div>
+
+            <div class="mt-16 text-center fade-in">
+                <div class="photo-card inline-block relative">
+                    <img src="./个人照片/photo3.jpg" class="w-full max-w-lg rounded-2xl shadow-xl cursor-pointer" onclick="openLightbox(2)" alt="项目创作">
+                    <div class="photo-caption absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-8 rounded-b-2xl">
+                        <p class="text-white text-lg">2026年，独立打造AI求职产品，解决真实求职痛点</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 能力武器库 -->
+    <section id="ability" class="py-28 px-6 relative">
+        <div class="gradient-bg"></div>
+        <div class="max-w-6xl mx-auto z-10 relative">
+            <h2 class="text-4xl md:text-5xl font-extrabold text-[var(--text-dark)] mb-6 split-text fade-in">能力武器库</h2>
+            <p class="text-[var(--text-gray)] text-lg mb-16 fade-in">我的核心技能与荣誉成果</p>
+            
+            <div class="grid md:grid-cols-2 gap-12">
+                <div class="bg-white p-10 rounded-3xl shadow-md card-3d fade-in" onclick="openModal('skill-detail')">
+                    <h3 class="text-2xl font-bold mb-8 text-[var(--text-dark)]">核心技能</h3>
+                    <div class="space-y-6">
+                        <div>
+                            <h4 class="font-bold text-[var(--primary)] mb-4 text-lg">AI产品能力</h4>
+                            <div class="flex flex-wrap gap-3">
+                                <span class="skill-tag px-4 py-2 bg-[var(--primary-light)] text-[var(--primary)] font-medium rounded-full">AI产品全流程</span>
+                                <span class="skill-tag px-4 py-2 bg-[var(--primary-light)] text-[var(--primary)] font-medium rounded-full">Prompt工程</span>
+                                <span class="skill-tag px-4 py-2 bg-[var(--primary-light)] text-[var(--primary)] font-medium rounded-full">AI Agent</span>
+                                <span class="skill-tag px-4 py-2 bg-[var(--primary-light)] text-[var(--primary)] font-medium rounded-full">RAG知识库</span>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-[var(--primary)] mb-4 text-lg">数据分析</h4>
+                            <div class="flex flex-wrap gap-3">
+                                <span class="skill-tag px-4 py-2 bg-[var(--primary-light)] text-[var(--primary)] font-medium rounded-full">A/B测试</span>
+                                <span class="skill-tag px-4 py-2 bg-[var(--primary-light)] text-[var(--primary)] font-medium rounded-full">数据挖掘</span>
+                                <span class="skill-tag px-4 py-2 bg-[var(--primary-light)] text-[var(--primary)] font-medium rounded-full">用户洞察</span>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-[var(--primary)] mb-4 text-lg">技术工具</h4>
+                            <div class="flex flex-wrap gap-3">
+                                <span class="skill-tag px-4 py-2 bg-[var(--primary-light)] text-[var(--primary)] font-medium rounded-full">Python</span>
+                                <span class="skill-tag px-4 py-2 bg-[var(--primary-light)] text-[var(--primary)] font-medium rounded-full">SQL</span>
+                                <span class="skill-tag px-4 py-2 bg-[var(--primary-light)] text-[var(--primary)] font-medium rounded-full">HTML/CSS/JS</span>
+                                <span class="skill-tag px-4 py-2 bg-[var(--primary-light)] text-[var(--primary)] font-medium rounded-full">Office</span>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-[var(--primary)] mb-4 text-lg">软素质</h4>
+                            <div class="flex flex-wrap gap-3">
+                                <span class="skill-tag px-4 py-2 bg-[var(--primary-light)] text-[var(--primary)] font-medium rounded-full">跨部门沟通</span>
+                                <span class="skill-tag px-4 py-2 bg-[var(--primary-light)] text-[var(--primary)] font-medium rounded-full">项目管理</span>
+                                <span class="skill-tag px-4 py-2 bg-[var(--primary-light)] text-[var(--primary)] font-medium rounded-full">公众表达</span>
+                                <span class="skill-tag px-4 py-2 bg-[var(--primary-light)] text-[var(--primary)] font-medium rounded-full">逻辑思维</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="modal-tip mt-8">点击查看完整能力与经历深挖</p>
+                </div>
+                <div class="bg-white p-10 rounded-3xl shadow-md fade-in">
+                    <h3 class="text-2xl font-bold mb-8 text-[var(--text-dark)]">荣誉 & 成果</h3>
+                    <ul class="space-y-5 text-lg">
+                        <li class="flex items-center gap-4 p-4 rounded-xl bg-[var(--bg-warm)] hover:bg-[var(--primary-light)] transition-all">
+                            <i class="fa fa-trophy text-2xl text-[var(--primary)]"></i>
+                            <span class="font-medium">上海大学优秀班委</span>
+                        </li>
+                        <li class="flex items-center gap-4 p-4 rounded-xl bg-[var(--bg-warm)] hover:bg-[var(--primary-light)] transition-all">
+                            <i class="fa fa-trophy text-2xl text-[var(--primary)]"></i>
+                            <span class="font-medium">自强不息奖学金</span>
+                        </li>
+                        <li class="flex items-center gap-4 p-4 rounded-xl bg-[var(--bg-warm)] hover:bg-[var(--primary-light)] transition-all">
+                            <i class="fa fa-trophy text-2xl text-[var(--primary)]"></i>
+                            <span class="font-medium">辩论赛最佳辩手</span>
+                        </li>
+                        <li class="flex items-center gap-4 p-4 rounded-xl bg-[var(--bg-warm)] hover:bg-[var(--primary-light)] transition-all">
+                            <i class="fa fa-trophy text-2xl text-[var(--primary)]"></i>
+                            <span class="font-medium">英语演讲大赛三等奖</span>
+                        </li>
+                        <li class="flex items-center gap-4 p-4 rounded-xl bg-[var(--bg-warm)] hover:bg-[var(--primary-light)] transition-all">
+                            <i class="fa fa-book text-2xl text-[var(--primary)]"></i>
+                            <span class="font-medium">AI国际会议论文发表</span>
+                        </li>
+                        <li class="flex items-center gap-4 p-4 rounded-xl bg-[var(--bg-warm)] hover:bg-[var(--primary-light)] transition-all">
+                            <i class="fa fa-language text-2xl text-[var(--primary)]"></i>
+                            <span class="font-medium">雅思8.0</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 生活放映厅 -->
+    <section id="life" class="py-28 px-6 bg-white relative">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-extrabold text-[var(--text-dark)] mb-6 split-text fade-in">生活放映厅</h2>
+            <p class="text-[var(--text-gray)] text-lg mb-16 fade-in">工作中严谨专业，生活里热烈鲜活</p>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="photo-card relative fade-in">
+                    <img src="./个人照片/photo4.jpg" class="w-full h-80 object-cover rounded-2xl shadow-lg cursor-pointer" onclick="openLightbox(3)" alt="生活照4">
+                    <div class="photo-caption absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 rounded-b-2xl">
+                        <p class="text-white">热烈奔赴山海</p>
+                    </div>
+                </div>
+                <div class="photo-card relative fade-in">
+                    <img src="./个人照片/photo5.jpg" class="w-full h-80 object-cover rounded-2xl shadow-lg cursor-pointer" onclick="openLightbox(4)" alt="生活照5">
+                    <div class="photo-caption absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 rounded-b-2xl">
+                        <p class="text-white">用心感受生活</p>
+                    </div>
+                </div>
+                <div class="photo-card relative fade-in">
+                    <img src="./个人照片/photo6.jpg" class="w-full h-80 object-cover rounded-2xl shadow-lg cursor-pointer" onclick="openLightbox(5)" alt="生活照6">
+                    <div class="photo-caption absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 rounded-b-2xl">
+                        <p class="text-white">自信闪耀舞台</p>
+                    </div>
+                </div>
+                <div class="photo-card relative fade-in">
+                    <img src="./个人照片/photo7.jpg" class="w-full h-80 object-cover rounded-2xl shadow-lg cursor-pointer" onclick="openLightbox(6)" alt="生活照7">
+                    <div class="photo-caption absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 rounded-b-2xl">
+                        <p class="text-white">记录温暖瞬间</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 联结通道 -->
+    <section id="contact" class="py-28 px-6 relative">
+        <div class="gradient-bg"></div>
+        <div class="max-w-6xl mx-auto z-10 relative">
+            <h2 class="text-4xl md:text-5xl font-extrabold text-[var(--text-dark)] mb-6 split-text fade-in">联结通道</h2>
+            <p class="text-[var(--text-gray)] text-lg mb-16 fade-in">期待和同频的你，一起创造有价值的产品</p>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white p-8 rounded-3xl shadow-md text-center card-3d fade-in magnetic">
+                    <i class="fa fa-phone text-4xl text-[var(--primary)] mb-6"></i>
+                    <h3 class="font-bold text-xl mb-3">内地电话</h3>
+                    <p class="text-[var(--text-gray)] cursor-pointer" onclick="copyToClipboard('13524698276')">13524698276</p>
+                </div>
+                <div class="bg-white p-8 rounded-3xl shadow-md text-center card-3d fade-in magnetic">
+                    <i class="fa fa-phone text-4xl text-[var(--primary)] mb-6"></i>
+                    <h3 class="font-bold text-xl mb-3">香港电话</h3>
+                    <p class="text-[var(--text-gray)] cursor-pointer" onclick="copyToClipboard('84957105')">84957105</p>
+                </div>
+                <div class="bg-white p-8 rounded-3xl shadow-md text-center card-3d fade-in magnetic">
+                    <i class="fa fa-envelope text-4xl text-[var(--primary)] mb-6"></i>
+                    <h3 class="font-bold text-xl mb-3">邮箱</h3>
+                    <p class="text-[var(--text-gray)] cursor-pointer" onclick="copyToClipboard('2116634927@qq.com')">2116634927@qq.com</p>
+                </div>
+                <div class="bg-white p-8 rounded-3xl shadow-md text-center card-3d fade-in magnetic">
+                    <i class="fa fa-github text-4xl text-[var(--primary)] mb-6"></i>
+                    <h3 class="font-bold text-xl mb-3">GitHub</h3>
+                    <a href="https://github.com/hannahliu0119-stack/" target="_blank" class="text-[var(--primary)] font-bold">作品集链接</a>
+                </div>
+            </div>
+
+            <div class="text-center mt-20 fade-in">
+                <p class="text-[var(--text-gray)] italic text-xl max-w-2xl mx-auto">
+                    “感谢你完整浏览我的个人主页，期待和你相遇，一起创造更多可能。”
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 回到顶部按钮 -->
+    <div id="backToTop" class="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+        <i class="fa fa-arrow-up text-xl"></i>
+    </div>
+
+    <!-- 照片灯箱 -->
+    <div id="lightbox" class="lightbox">
+        <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
+        <span class="lightbox-nav lightbox-prev" onclick="changePhoto(-1)">&#10094;</span>
+        <img id="lightboxImg" src="" alt="照片">
+        <span class="lightbox-nav lightbox-next" onclick="changePhoto(1)">&#10095;</span>
+    </div>
+
+    <!-- 详情弹窗容器 -->
+    <div id="detailModal" class="detail-modal" onclick="if(event.target === this) closeModal()">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        // 照片数组
+        const photos = [
+            './个人照片/photo1.jpg',
+            './个人照片/photo2.jpg',
+            './个人照片/photo3.jpg',
+            './个人照片/photo4.jpg',
+            './个人照片/photo5.jpg',
+            './个人照片/photo6.jpg',
+            './个人照片/photo7.jpg'
+        ];
+        let currentPhotoIndex = 0;
+
+        // 鼠标跟随效果
+        const cursorFollower = document.getElementById('cursor-follower');
+        const cursorBlur = document.getElementById('cursor-blur');
+        window.addEventListener('mousemove', (e) => {
+            const x = e.clientX;
+            const y = e.clientY;
+            cursorFollower.style.transform = `translate(${x - 10}px, ${y - 10}px)`;
+            cursorBlur.style.transform = `translate(${x - 150}px, ${y - 150}px)`;
+        });
+
+        // 磁悬浮按钮效果
+        const magneticElements = document.querySelectorAll('.magnetic');
+        magneticElements.forEach(el => {
+            el.addEventListener('mousemove', (e) => {
+                const rect = el.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                el.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px)`;
+            });
+            el.addEventListener('mouseleave', () => {
+                el.style.transform = `translate(0, 0)`;
+            });
+        });
+
+        // 文字拆分动画
+        const splitTexts = document.querySelectorAll('.split-text');
+        splitTexts.forEach(text => {
+            const originalText = text.textContent;
+            text.innerHTML = '';
+            originalText.split('').forEach(char => {
+                const span = document.createElement('span');
+                span.className = 'char';
+                span.textContent = char === ' ' ? '\u00A0' : char;
+                text.appendChild(span);
+            });
+        });
+
+        // 滚动渐入动画
+        const fadeElements = document.querySelectorAll('.fade-in');
+        const charElements = document.querySelectorAll('.char');
+        const countUpElements = document.querySelectorAll('.count-up');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // 基础渐入
+                    entry.target.classList.add('visible');
+                    
+                    // 文字拆分动画
+                    if (entry.target.classList.contains('split-text')) {
+                        const chars = entry.target.querySelectorAll('.char');
+                        chars.forEach((char, index) => {
+                            setTimeout(() => {
+                                char.classList.add('visible');
+                            }, index * 30);
+                        });
+                    }
+
+                    // 数字增长动画
+                    if (entry.target.classList.contains('count-up')) {
+                        const target = parseInt(entry.target.getAttribute('data-target'));
+                        let current = 0;
+                        const duration = 1500;
+                        const step = target / (duration / 16);
+                        const timer = setInterval(() => {
+                            current += step;
+                            if (current >= target) {
+                                entry.target.textContent = target;
+                                clearInterval(timer);
+                            } else {
+                                entry.target.textContent = Math.floor(current);
+                            }
+                        }, 16);
+                    }
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        fadeElements.forEach(el => observer.observe(el));
+        charElements.forEach(el => observer.observe(el));
+        countUpElements.forEach(el => observer.observe(el));
+
+        // 视差滚动
+        const parallaxElements = document.querySelectorAll('.parallax');
+        window.addEventListener('scroll', () => {
+            const scrollY = window.pageYOffset;
+            parallaxElements.forEach(el => {
+                const speed = el.getAttribute('data-speed') || 0.2;
+                el.style.transform = `translateY(${scrollY * speed}px)`;
+            });
+        });
+
+        // 导航高亮
+        const sections = document.querySelectorAll('section[id]');
+        const navLinks = document.querySelectorAll('.nav-link');
+        window.addEventListener('scroll', () => {
+            // 滚动进度条更新
+            const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrollPercent = (scrollTop / scrollHeight) * 100;
+            document.getElementById('scrollProgress').style.width = scrollPercent + '%';
+
+            // 导航栏滚动效果
+            const navbar = document.getElementById('navbar');
+            if (scrollTop > 100) {
+                navbar.style.padding = '12px 0';
+                navbar.style.boxShadow = '0 10px 30px rgba(0,0,0,0.08)';
+            } else {
+                navbar.style.padding = '20px 0';
+                navbar.style.boxShadow = '0 2px 10px rgba(0,0,0,0.05)';
+            }
+
+            // 导航高亮逻辑
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (window.pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+            });
+            navLinks.forEach(link => {
+                link.classList.remove('nav-active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('nav-active');
+                }
+            });
+
+            // 回到顶部显示
+            const backToTop = document.getElementById('backToTop');
+            if (window.pageYOffset > 500) {
+                backToTop.classList.add('visible');
+            } else {
+                backToTop.classList.remove('visible');
+            }
+        });
+
+        // 照片灯箱功能
+        function openLightbox(index) {
+            currentPhotoIndex = index;
+            document.getElementById('lightboxImg').src = photos[index];
+            document.getElementById('lightbox').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        function closeLightbox() {
+            document.getElementById('lightbox').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        function changePhoto(direction) {
+            currentPhotoIndex += direction;
+            if (currentPhotoIndex < 0) currentPhotoIndex = photos.length - 1;
+            if (currentPhotoIndex >= photos.length) currentPhotoIndex = 0;
+            document.getElementById('lightboxImg').src = photos[currentPhotoIndex];
+        }
+
+        // 详情弹窗内容库
+        const modalContent = {
+            'edu-hku': `
+                <h2 class="modal-title">香港大学 学术背景深挖</h2>
+                <p>硕士阶段选择香港大学经管学院商业分析的AI方向，是我职业路径的核心规划，核心目标是补全商业思维的短板，完成从技术底层到商业落地的能力闭环。</p>
+                <h3 class="modal-subtitle">核心学习与能力成长</h3>
+                <ul>
+                    <li>系统学习了商业统计、用户行为分析、A/B测试等核心方法，学会了从商业价值的角度判断一个产品、一个策略的合理性，跳出了「为了做技术而做技术、为了做产品而做产品」的误区，能始终围绕业务的核心商业目标做决策。</li>
+                    <li>聚焦AI技术的商业落地，深度研究了全球AI产品的商业化路径，形成了自己的AI产品落地方法论，能精准判断一个AI需求的技术可行性、商业价值和落地成本。</li>
+                    <li>主导了多个AI产品相关的研究项目，完成了从需求分析、方案设计、数据验证到策略输出的完整闭环，把课堂知识转化为了可落地的产品能力。</li>
+                </ul>
+            `,
+            'edu-shu': `
+                <h2 class="modal-title">上海大学 学术背景深挖</h2>
+                <p>本科阶段深耕人工智能专业，为我打下了坚实的技术底层认知，也是我能和研发团队无障碍沟通、精准判断AI技术边界的核心基础。</p>
+                <h3 class="modal-subtitle">核心学习与能力成长</h3>
+                <ul>
+                    <li>系统学习了机器学习、计算机视觉、自然语言理解等AI核心课程，完整掌握了技术开发的全流程逻辑，能看懂技术文档、和研发团队无障碍沟通需求，能准确判断一个产品需求的技术可行性、落地成本和潜在风险，不会出现和研发信息差过大的问题。</li>
+                    <li>工科的学术训练让我养成了「先假设、再验证、用数据闭环」的思维习惯，做任何决策都先找数据支撑，不拍脑袋定方案，这也是我做产品经理的核心底层思维。</li>
+                    <li>以作者身份在国际会议上发表了《Enhancing Unsupervised Few-Shot Medical Image Classification with Weight-Enhanced Contrastive Learning》论文，核心研究基于权重增强对比学习的无监督少样本医学图像分类，对机器学习、对比学习、计算机视觉有了深度的学术研究，能从底层理解AI技术的能力边界和发展趋势。</li>
+                </ul>
+            `,
+            'intern-fosun': `
+                <h2 class="modal-title">复星旅游文化集团AI Lab AI产品经理 实习深挖</h2>
+                <p>这段实习我是这款钉钉办公赋能AI产品的唯一专属产品经理，独立负责了从0到1的全流程落地，完整经历了一款AI产品从需求挖掘到上线推广的全生命周期。</p>
+                <h3 class="modal-subtitle">1. 需求挖掘阶段：精准定位产品核心价值</h3>
+                <p>我对接了集团10多个部门的负责人和一线员工，做了20多场一对一访谈，分层拆解了不同角色的核心诉求：</p>
+                <ul>
+                    <li>集团高层：关注组织效率提升和核心数据安全</li>
+                    <li>部门负责人：关注知识沉淀和新人培训成本降低</li>
+                    <li>一线员工：关注找信息的效率和重复答疑的减少</li>
+                </ul>
+                <p>我把这些差异化需求整合起来，最终把产品定位成「基于内部知识库的AI问答办公助手」，而不是一个泛化的AI聊天工具，精准击中了企业内部办公的核心痛点。</p>
+                <h3 class="modal-subtitle">2. 产品设计阶段：搭建三级精细化权限管控体系</h3>
+                <p>产品设计最核心的难点是跨部门的知识库归集和数据安全问题，当时各部门都不愿意上传内部资料，核心顾虑是涉密数据泄露、权限失控。针对这个问题，我搭建了一套三级精细化权限管控体系：</p>
+                <ul>
+                    <li><strong>组织架构维度</strong>：做了集团 - 子公司 - 部门 - 小组的四层数据隔离，非本部门的用户完全看不到对应部门的私有知识库</li>
+                    <li><strong>角色维度</strong>：划分了超级管理员 - 部门管理员 - 内容编辑者 - 只读查看者 - 仅可问答调用者五级角色，每个角色的操作权限完全拆分</li>
+                    <li><strong>内容维度</strong>：设置了全集团公开 - 部门私有 - 绝密文件单独授权三级内容权限，涉密文件只能给指定用户开放查看权限</li>
+                </ul>
+                <p>同时我对接了钉钉的安全团队，给所有数据操作做了加密和全流程留痕，确保所有操作可追溯、可审计，完全符合集团的数据合规要求。这套体系落地后，各部门的顾虑完全打消，最终完成了10000+官方知识库文件的沉淀。</p>
+                <h3 class="modal-subtitle">3. AI Agent打磨阶段：从根源解决AI幻觉问题</h3>
+                <p>企业内部问答，答案的准确性是生命线。我没有直接调用现成的AI接口，而是设计了完整的Agent工作流：</p>
+                <p><strong>用户提问 → 意图识别分类 → 知识库精准检索 → 内容召回与权重排序 → 合规性准确性校验 → 答案生成 + 来源标注 → 用户反馈收集 → 模型持续优化</strong></p>
+                <p>同时我设置了「仅基于知识库内容回答」的硬性规则，给高频问题做了固化答案，低匹配度的问题会自动流转到对应部门的负责人做人工回复，从根源上减少了幻觉问题，最终产品的问答准确率稳定在90%以上。</p>
+                <h3 class="modal-subtitle">4. 产品推广阶段：完成冷启动与用户渗透</h3>
+                <p>我组织了集团层面的AI赋能直播培训会，最终做到了80%的目标用户到场率、75%以上的完整观看率。这个结果不是靠发个全员通知实现的：</p>
+                <ul>
+                    <li>提前一对一沟通了各部门的负责人，讲清楚产品能给部门带来的实际价值，让负责人主动推动部门员工参与</li>
+                    <li>针对不同部门的业务场景，提前准备了对应的使用案例，让员工能立刻get到产品对自己的用处</li>
+                    <li>培训后做了一对一的答疑跟进，给参与培训的员工开放了优先内测权限，快速完成了产品的冷启动</li>
+                </ul>
+                <h3 class="modal-subtitle">5. 行业研报撰写：支撑高层业务决策</h3>
+                <p>我负责撰写董事长每周阅览的「领导力 + AI」研报，核心做的是从海量的行业新闻、学术论文、竞品动态里，提炼出和复星旅文业务高度相关、可落地的AI应用方向，而不是空谈AI概念。每一份研报我都会先对齐集团的核心业务场景，比如AI如何赋能酒店运营、文旅场景用户体验、内部组织效率提升，确保内容能直接支撑高层决策，没有半句冗余信息。</p>
+            `,
+            'intern-rentuo': `
+                <h2 class="modal-title">任拓数据科技 数据分析师 实习深挖</h2>
+                <p>这段实习我核心完成了两件事，一是主动优化了团队的数据处理流程，二是从基础数据处理拓展到了外部市场洞察，形成了完整的商业分析能力闭环。</p>
+                <h3 class="modal-subtitle">1. 数据处理流程优化：主动发现痛点并落地解决方案</h3>
+                <p>刚入职的时候，我发现团队同事每天要花3-4小时用Excel做VLOOKUP多表匹配，还有SKU名称的人工清洗——不同平台的同一个SKU写法千差万别，只能人工筛查，不仅效率极低，还经常出现人为错误，影响后续的分析结果。</p>
+                <p>针对这个痛点，我先自己做了demo脚本：</p>
+                <ul>
+                    <li>用Python的pandas库替代VLOOKUP做多表自动匹配</li>
+                    <li>用FuzzyWuzzy库做模糊字符串匹配，先过滤掉营销类停用词，再提取品牌、品类、规格等核心关键词，设置合理的匹配阈值，实现SKU名称的自动清洗和归类</li>
+                    <li>设置了低匹配度内容的人工复核机制，确保准确率</li>
+                </ul>
+                <p>最终这个脚本把原本3-4小时的工作压缩到了5分钟就能完成，数据准备效率提升了80%，还完全规避了人为错误。验证完效果后，我给团队的同事做了培训，写了详细的操作手册，让不会写代码的同事也能一键运行脚本，最终这个工具成为了全团队的标准工作流程。</p>
+                <h3 class="modal-subtitle">2. 《新品速递周报》：搭建完整商业分析框架</h3>
+                <p>每周独立制作的《新品速递周报》，我不是简单堆砌数据，而是搭建了完整的商业分析框架：</p>
+                <ul>
+                    <li><strong>数据融合</strong>：融合内部的品牌销售数据（新品的销量、客单价、渠道分布）+ 外部竞品数据（用Python爬虫抓取竞品官网、小红书、抖音的新品信息、用户评论、营销动作）</li>
+                    <li><strong>用户洞察</strong>：对用户评论做情感分析和关键词提取，挖掘用户的真实需求和痛点</li>
+                    <li><strong>分层分析</strong>：先看大盘的赛道增长趋势，再拆解核心竞品的新品卖点、用户反馈、营销动作，再结合内部销售数据做对标分析，找到我们的优势和短板</li>
+                    <li><strong>策略输出</strong>：输出前瞻性的市场判断和可落地的策略建议，比如哪个赛道有增量机会、我们应该如何布局、竞品的哪些动作值得借鉴，而不是只给数据不给结论</li>
+                </ul>
+                <p>这份周报最终成为了品牌客户做新品决策的核心参考资料，我的工作也得到了客户和团队的高度认可。</p>
+            `,
+            'intern-dbzq': `
+                <h2 class="modal-title">东北证券 运营策划(互联网渠道) 实习深挖</h2>
+                <p>这段实习我核心建立了金融业务的底层认知，掌握了用户全生命周期运营的核心方法论，同时深刻理解了金融行业的合规要求。</p>
+                <h3 class="modal-subtitle">1. 渠道引流分析：搭建全链路漏斗与ROI评估体系</h3>
+                <p>我不是简单统计开户数、入金数，而是做了完整的渠道全链路价值分析。我把渠道转化拆解成了完整漏斗：</p>
+                <p><strong>曝光 → 点击 → 落地页访问 → 留资 → 开户 → 入金 → 交易</strong></p>
+                <p>我对每个渠道的每一步转化率都做了精细化拆解，精准定位每个渠道的核心问题：比如有的渠道曝光量大但点击率低，是素材和目标用户不匹配；有的渠道开户率高但入金率低，是用户都是羊毛党，质量极差。</p>
+                <p>同时我对渠道有效性的判断，核心用的是ROI标尺：计算每个渠道的单用户获客成本CAC，以及用户的生命周期价值LTV，只有LTV大于CAC的渠道，才是真正有效的、值得加大投入的渠道，否则哪怕开户数再多，也是赔本赚吆喝。</p>
+                <p>这个分析逻辑帮团队砍掉了3个高投入低产出的无效渠道，把预算集中到了高ROI的渠道，整体的入金转化率提升了12%。</p>
+                <h3 class="modal-subtitle">2. 客户触达SOP：基于用户生命周期的分层精细化运营</h3>
+                <p>我做的不是通用的群发模板，而是基于用户生命周期的分层精细化SOP。我先把用户分成了5个分层：新开户用户、沉默用户、活跃交易用户、高价值用户、高风险用户，针对不同分层的用户设计了完全差异化的触达内容、频率和渠道：</p>
+                <ul>
+                    <li>新用户：开户后7天的全流程引导，核心是降低操作门槛，引导入金交易</li>
+                    <li>沉默用户：用市场热点、专属活动唤醒，提升用户活跃度</li>
+                    <li>高价值用户：提供专属研报、一对一服务，提升用户粘性</li>
+                </ul>
+                <p>同时我把合规要求嵌入了SOP的每一个环节，所有内容都严格遵守证券行业的监管要求，不承诺收益、不诱导交易、必须标注投资风险，所有内容都提前通过了合规审核，不会出现上线后再修改的问题。这套SOP上线后，新用户的入金转化率提升了12%，沉默用户的唤醒率提升了8%。</p>
+                <h3 class="modal-subtitle">3. 社群维护与研报撰写：用户价值交付与信任建立</h3>
+                <p>金融社群的核心不是发广告，而是给用户提供持续的价值。我日常会做早盘提示、收评解读、热点分析，市场大幅波动的时候，会第一时间安抚用户情绪、解答疑问，维护社群的正向氛围。</p>
+                <p>撰写研报的时候，我会搭建清晰的逻辑框架，用数据支撑观点，严守合规底线，不做个股推荐、不承诺收益，确保内容客观、严谨，给用户提供真正有价值的参考。</p>
+            `,
+            'intern-pulan': `
+                <h2 class="modal-title">上海普兰金融服务有限公司 科技部 测试开发 实习深挖</h2>
+                <p>这段实习是我职业路径的起点，给我刻下了金融产品的严谨性底线，也让我完整了解了软件从需求到上线的全流程。</p>
+                <h3 class="modal-subtitle">1. 全流程测试：守住金融产品安全底线</h3>
+                <p>我负责的是「普兰村」金融服务软件的测试工作，这款软件是面向企业的票据交易、资金结算工具，对稳定性、安全性、准确性有极致的要求，一个微小的bug都可能导致用户的资金损失和合规风险。</p>
+                <p>我先梳理了产品的全量需求文档，编写了覆盖正常场景、异常场景、边界场景的完整测试用例，比如大额资金交易、网络中断、重复提交、权限越权等极端场景，确保没有测试死角。</p>
+                <p>执行测试的过程中，我独立发现并纠错了多个核心bug，每一个bug我都会精准复现、定位触发条件，编写详细的缺陷报告，提交给研发团队，再跟进修复进度，验证修复结果，形成完整的闭环。</p>
+                <h3 class="modal-subtitle">2. 接口测试：保障资金交易的安全稳定</h3>
+                <p>我用Postman做了完整的接口测试，编写了复杂接口的测试用例和脚本，覆盖了资金交易、数据传输、权限校验等核心接口，确保所有接口都安全、稳定，没有漏洞，不会出现数据泄露、权限越权、交易错误等严重问题。</p>
+                <h3 class="modal-subtitle">3. 能力成长与底层思维养成</h3>
+                <p>这段实习我还系统学习了Java的基础知识，尝试设计并实现了电商平台的基础流程，完整了解了软件从需求到开发、测试、上线的全流程。</p>
+                <p>这段经历给我最大的影响，是让我深刻理解了「金融产品无小事」，任何一个细节的疏漏都可能带来毁灭性的后果，养成了极致严谨、提前预判风险的做事习惯，做任何方案都会先排查漏洞、评估风险，再推进落地，这个思维也一直贯穿在我后续的产品经理工作中。</p>
+            `,
+            'project-abtest': `
+                <h2 class="modal-title">K-12 数学视频干预效果 A/B 测试与异质性分析研究项目 深挖</h2>
+                <p>这个项目我带领8人团队完成，核心是通过严谨的A/B测试验证数学视频干预对学生学习效果的影响，完整经历了从实验设计、数据处理、分析验证到策略输出的全流程。</p>
+                <h3 class="modal-subtitle">1. 项目启动：明确实验目标与核心假设</h3>
+                <p>项目启动阶段，我先明确了实验的核心目标和假设：我们的目标是验证「学生做错题后，推送对应知识点的讲解视频，能否提升后续的答题正确率」，核心假设是视频干预能显著提升学习效果，且对不同基础、不同性别的学生有差异化的影响。</p>
+                <h3 class="modal-subtitle">2. 数据处理：保障数据的有效性</h3>
+                <p>我带领团队完成了8297名学生、10万+道题目数据的采集、清洗、去重、异常值处理，剔除了未完成全程实验的无效数据，确保数据的有效性，为后续的分析打下了坚实的基础。</p>
+                <h3 class="modal-subtitle">3. 实验有效性验证：确保实验结果的可信度</h3>
+                <p>我主导完成了分组随机性和基线平衡性校验，这是A/B实验的核心，也是很多人会忽略的环节。我把学生的前置数学成绩、答题正确率、性别、年级、学校等所有可能影响实验结果的协变量，全部纳入了校验范围，用T检验验证了实验组和对照组的所有基线指标，都没有统计学上的显著差异，确保两组用户完全同质，唯一的变量就是「视频干预」这个动作，从根源上保证了实验结果的可信度，不会把随机波动当成有效增长。</p>
+                <h3 class="modal-subtitle">4. 数据分析：核心假设验证与异质性洞察</h3>
+                <p>我主导完成了核心的假设检验，用T检验验证了实验组的后续答题正确率，显著高于对照组，证明了视频干预的有效性。</p>
+                <p>同时我带领团队做了异质性分析，拆解了数学基础、性别等多个维度，最终挖掘出了核心洞察：<strong>低基础学生认知补偿效应</strong>——视频干预对数学基础薄弱的学生有极其显著的效果，能大幅提升他们的后续答题正确率，但对基础较好的学生，效果并不显著，甚至会分散注意力，有负面效果。</p>
+                <h3 class="modal-subtitle">5. 成果输出：从数据到可落地的策略</h3>
+                <p>最终我带领团队基于这个核心洞察，提炼出了分层自适应视频投放、视频UX优化等可落地的个性化教学干预策略，形成了完整的研究报告，给教育平台的教学优化提供了数据支撑，完成了「数据 → 洞察 → 策略 → 落地」的完整闭环。</p>
+                <h3 class="modal-subtitle">6. 团队管理：解决跨专业协同难题</h3>
+                <p>团队成员来自统计、教育、计算机等不同专业，对A/B实验的理解完全不同，前期进度很慢。我先组织团队会议，用大白话对齐了项目目标和实验的核心逻辑，再根据每个人的专业优势拆分任务、明确交付节点，建立了每周2次的进度同步机制，及时解决团队的分歧和卡点，最终带领团队提前完成了项目，拿到了高质量的研究成果。</p>
+            `,
+            'project-ecolink': `
+                <h2 class="modal-title">EcoLink AI 社区环保公益智能平台项目 深挖</h2>
+                <p>这个项目我作为产品经理，主导完成了从产品定位、技术架构、商业模型设计到落地规划的全流程，打造了国内首个聚焦社区场景的AI环保公益综合平台。</p>
+                <h3 class="modal-subtitle">1. 产品定位：精准击中行业核心痛点</h3>
+                <p>产品定位阶段，我先做了完整的市场调研，发现现有环保类产品的核心痛点：</p>
+                <ul>
+                    <li>要么是纯工具型的垃圾分类识别，功能单一，无法形成用户粘性</li>
+                    <li>要么是闲置交易平台，商业化过重，广告泛滥，偏离了环保公益的核心</li>
+                    <li>普遍存在数据滥用、算法歧视、适老化不足、对特殊群体不友好的问题</li>
+                </ul>
+                <p>基于这个洞察，我把产品定位为国内首个聚焦社区场景的AI环保公益综合平台，核心打造「分类 - 回收 - 闲置循环 - 公益捐赠」的完整闭环，主打无广告、非商业化数据使用、全群体可及，精准击中了行业的核心痛点。</p>
+                <h3 class="modal-subtitle">2. 产品设计：兼顾用户体验与社会价值</h3>
+                <p>我主导完成了两大核心模块的设计：</p>
+                <ul>
+                    <li><strong>智能垃圾分类指导模块</strong>：基于计算机视觉做垃圾识别，同时搭配了适老化的语音交互功能，让老人不用打字、不用复杂操作，对着镜头就能完成垃圾识别，解决了老年群体的使用痛点</li>
+                    <li><strong>闲置物品公益流转模块</strong>：搭建了从闲置发布、智能匹配、线下流转到公益捐赠的完整流程，同时设计了公平的曝光机制，不会按用户的身份、消费能力做流量倾斜，规避了算法歧视的问题</li>
+                </ul>
+                <h3 class="modal-subtitle">3. 技术架构与合规设计：守住数据安全底线</h3>
+                <p>基于自己的人工智能专业背景，我主导了技术架构的顶层设计，确保产品功能的技术可行性。同时严格遵循《个人信息保护法》，设计了用户数据本地加密、最小权限调用、非商业化使用的规则，承诺用户数据绝对不会用于广告变现，从根源上规避了数据滥用的风险。</p>
+                <h3 class="modal-subtitle">4. 商业模型设计：公益与商业的可持续平衡</h3>
+                <p>我没有陷入公益项目只能靠融资烧钱的误区，搭建了「公益为核、商业赋能」的可持续商业模式：</p>
+                <ul>
+                    <li>联动政府部门，承接社区环境治理的数字化项目</li>
+                    <li>联动再生资源企业，提供精准的社区回收流量，收取技术服务费</li>
+                    <li>联动品牌方，做公益联名活动，品牌方提供公益捐赠物资，平台给品牌方做正向的品牌价值传递</li>
+                    <li>联动公益组织，把闲置物品精准捐赠给需要的群体，形成完整的公益闭环</li>
+                </ul>
+                <p>这个模型既守住了公益属性，又找到了可持续的盈利来源，实现了公益价值、商业收益、合规要求的三重统一。</p>
+                <h3 class="modal-subtitle">5. 落地推进：从原型到真实场景的落地</h3>
+                <p>我统筹团队完成了技术研发、生态合作、社区试点的全流程排期，和上海多个社区、再生资源企业、公益组织达成了初步的合作意向，确保产品能真正落地，而不是停留在原型阶段。</p>
+            `,
+            'project-zhihai': `
+                <h2 class="modal-title">职海导航 AI 求职 Offer 成功率评估助手项目 深挖</h2>
+                <p>这个项目我独立完成了从0到1的全流程落地，形成了完整的产品闭环，是我AI产品经理能力的完整实战验证。</p>
+                <h3 class="modal-subtitle">1. 项目起点：精准挖掘用户核心痛点</h3>
+                <p>项目的起点，是我发现身边求职的同学普遍有一个核心痛点：不知道自己的简历和目标岗位的匹配度，投简历石沉大海却找不到问题所在，市面上的工具要么收费高昂，要么只会泛泛夸奖，无法给出客观的量化评估和可落地的优化建议。</p>
+                <p>基于这个痛点，我确定了产品的核心定位：给求职者提供集简历深度分析、岗位匹配评估、Offer成功率量化、优化建议输出的极简AI工具。</p>
+                <h3 class="modal-subtitle">2. 产品设计：极致的极简用户体验</h3>
+                <p>产品设计阶段，我做了极致的极简流程设计，把核心流程压缩为「上传简历 - 输入目标岗位JD - 生成评估报告」三步，用户零学习成本就能拿到结果，避免了复杂的操作步骤。同时我用墨刀完成了3页交互原型的设计，确保产品的操作逻辑清晰、体验流畅。</p>
+                <h3 class="modal-subtitle">3. 功能落地：AI Agent与五维评估模型搭建</h3>
+                <p>我基于Coze平台开发并配置了专属的AI Agent：</p>
+                <ul>
+                    <li>集成了文档解析工具读取简历内容，精准提取用户的学历背景、实习经历、项目经验、专业技能等核心信息</li>
+                    <li>集成了网页搜索工具实时获取目标岗位的行业标准、公司招聘偏好，确保评估标准贴合真实的招聘市场</li>
+                    <li>编写了专属的提示词工程，搭建了「学历背景 - 实习经历 - 项目经历 - 专业技能 - 软素质」五维的成功率量化计算模型，每个维度都设置了和岗位要求匹配的权重，能精准算出简历和岗位的匹配度分数</li>
+                    <li>拆解每个维度的优劣势，给出具体的、可落地的简历优化建议，而不是空泛的分数和夸奖</li>
+                </ul>
+                <h3 class="modal-subtitle">4. 上线发布：完成完整产品闭环</h3>
+                <p>我完成了全流程的功能测试和优化后，发布了公开可访问的网页版产品，用户可以直接体验完整的操作流程，形成了「需求设计 - 原型开发 - Agent落地 - 上线发布」的完整产品闭环，验证了我独立完成AI产品从0到1落地的能力。</p>
+            `,
+            'skill-detail': `
+                <h2 class="modal-title">核心能力与在校经历 深挖</h2>
+                <h3 class="modal-subtitle">1. 专业技能 落地能力验证</h3>
+                <ul>
+                    <li><strong>Python</strong>：能熟练用于数据自动化处理、文本分析、爬虫、数据可视化，有真实的落地成果——在任拓数据实习期间，开发的自动化数据处理脚本把团队数据准备效率提升了80%，成为了全团队的标准工作流程。</li>
+                    <li><strong>SQL</strong>：能熟练用于数据提取、多表关联查询、数据统计分析，能独立完成业务所需的全流程数据提取和分析工作，支撑商业决策输出。</li>
+                    <li><strong>Office三件套</strong>：能熟练用于数据透视表、函数计算、可视化报表制作、方案文档撰写、项目汇报，有长期的周报、研报、产品文档撰写经验，能输出逻辑清晰、重点突出的专业文档和汇报材料。</li>
+                    <li><strong>综合能力</strong>：同时掌握内容制作、视频剪辑、活动组织筹划的技能，能适应互联网快节奏的工作要求，快速补位团队需要的工作。</li>
+                </ul>
+                <h3 class="modal-subtitle">2. 在校职务与校园经历 能力迁移</h3>
+                <ul>
+                    <li><strong>团支部书记</strong>：负责对接学校、学院和班级同学，处理日常的团务工作，组织班级活动，锻炼了我的责任心、组织协调能力和跨层级沟通能力，这些能力能直接迁移到产品经理的跨部门沟通、项目推进工作中。</li>
+                    <li><strong>ASC世界大学生超级计算机决赛志愿者宣传组组长</strong>：负责赛事的宣传策划、物料制作、志愿者统筹，锻炼了我的大型项目统筹能力和高压下的应急处理能力，能从容应对产品上线、大型活动等高压场景。</li>
+                    <li><strong>晚会主持人、辩论赛最佳辩手</strong>：多次担任晚会主持人、参加辩论赛拿到最佳辩手，锻炼了我的逻辑思维能力、公众表达能力和临场应变能力，能完美胜任产品经理的方案汇报、需求评审、跨部门沟通等工作。</li>
+                </ul>
+                <h3 class="modal-subtitle">3. 论文发表 学术与技术底层认知</h3>
+                <p>我以作者身份在国际会议上发表了《Enhancing Unsupervised Few-Shot Medical Image Classification with Weight-Enhanced Contrastive Learning》这篇论文，核心研究的是基于权重增强对比学习的无监督少样本医学图像分类。</p>
+                <p>这段科研经历，让我对机器学习、对比学习、计算机视觉有了深度的学术研究，懂AI算法的底层逻辑和优化方法，能从学术底层理解AI技术的能力边界和发展趋势，不会做脱离技术实际的产品需求。同时，英文论文的撰写和发表，也进一步强化了我的英文读写能力，能无障碍阅读海外的前沿学术文献和行业报告，快速跟进全球AI技术的最新趋势。</p>
+            `
+        };
+
+        // 打开详情弹窗
+        function openModal(key) {
+            document.getElementById('modalBody').innerHTML = modalContent[key];
+            document.getElementById('detailModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        // 关闭详情弹窗
+        function closeModal() {
+            document.getElementById('detailModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // 一键复制
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('已复制到剪贴板: ' + text);
+            });
+        }
+
+        // 键盘事件控制
+        document.addEventListener('keydown', (e) => {
+            // 照片灯箱控制
+            if (document.getElementById('lightbox').style.display === 'flex') {
+                if (e.key === 'Escape') closeLightbox();
+                if (e.key === 'ArrowLeft') changePhoto(-1);
+                if (e.key === 'ArrowRight') changePhoto(1);
+            }
+            // 详情弹窗控制
+            if (document.getElementById('detailModal').style.display === 'flex') {
+                if (e.key === 'Escape') closeModal();
+            }
+        });
+
+        // 点击空白关闭弹窗
+        document.getElementById('lightbox').addEventListener('click', function(e) {
+            if (e.target === this) closeLightbox();
+        });
+    </script>
+</body>
+</html>
